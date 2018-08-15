@@ -21,6 +21,8 @@ void LXRouteMap(NSString *route){
 
 @property (nonatomic, strong) NSMutableDictionary *lxStoreList;
 
+@property (nonatomic, strong) NSArray *schemes;
+
 @end
 
 @implementation LXRouter
@@ -33,6 +35,7 @@ void LXRouteMap(NSString *route){
     dispatch_once(&onceToken, ^{
         
         router = [[LXRouter alloc]init];
+        router.schemes = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"LSApplicationQueriesSchemes"];
     });
     
     return router;
@@ -47,6 +50,9 @@ void LXRouteMap(NSString *route){
     
     //如果是网址,直接web
     if ([self expressWeb:routeUrl animated:flag]) return;
+    
+    //如果是白名单scheme,直接跳转
+    if ([self expressSchemes:routeUrl]) return ;
     
     if (self.routeDelegate && [self.routeDelegate respondsToSelector:@selector(routeProject)]) {
         
@@ -63,18 +69,13 @@ void LXRouteMap(NSString *route){
     NSString *objectAction = routeUrl.host; //= toVC.push
     
     NSString *jumpType;//跳转方式
-    if (![objectAction containsString:@".push"] && ![objectAction containsString:@".present"] && ![objectAction containsString:@".scheme"] && ![route containsString:kSystemUrlContainString]) {
+    if (![objectAction containsString:@".push"] && ![objectAction containsString:@".present"]) {
         
         NSLog(@"未指定确切的跳转方式,被拒绝");
         return;
     }else{
         jumpType = [objectAction substringFromIndex:[objectAction rangeOfString:@"."].location +1];
         
-    }
-    //scheme 跳转
-    if ([jumpType isEqualToString:@"scheme"] || [route containsString:kSystemUrlContainString]){
-        
-        [self openScheme:routeUrl];
     }
     
     NSString *classString = [objectAction substringToIndex:[objectAction rangeOfString:@"."].location];
@@ -189,7 +190,7 @@ void LXRouteMap(NSString *route){
     NSPredicate *webUrlPredicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",webUrlRegex];
     BOOL isWeb = [webUrlPredicate evaluateWithObject:url.description];
     
-    if (!isWeb) return isWeb;//不是web直接返回
+    if (!isWeb) return NO;//不是web直接返回
     
     // 确定跳转web
     NSString *classString;
@@ -220,6 +221,18 @@ void LXRouteMap(NSString *route){
     }
     
     [[self topViewController].navigationController pushViewController:currentViewController animated:flag];
+    
+    return YES;
+}
+
+- (BOOL)expressSchemes:(NSURL *)url {
+    
+    //route验证跳转必须加入白名单 - 不想通过白名单请调用openScheme
+    if (![_schemes containsObject: url.scheme] && ![url.absoluteString containsString:kSystemUrlContainString]) {
+        
+        return NO;
+    }
+    [self openScheme:url];
     
     return YES;
 }
