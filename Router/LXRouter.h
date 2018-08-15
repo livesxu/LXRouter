@@ -3,9 +3,9 @@
 //  TestRouterLX
 //
 //  Created by Livespro on 2017/7/10.
-//  Copyright © 2017年 FZ. All rights reserved.
+//  Copyright © 2017年 Livespro. All rights reserved.
 //
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @protocol LXRouteDelegate <NSObject>
 
