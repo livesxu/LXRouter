@@ -217,7 +217,7 @@ void LXRouteMap(NSString *route){
     
     if (currentViewController) {
         
-        [currentViewController setValue:url.description forKey:@"urlString"];
+        [currentViewController setValue:[url.description stringByRemovingPercentEncoding] forKey:@"urlString"];
     }
     
     [[self topViewController].navigationController pushViewController:currentViewController animated:flag];
