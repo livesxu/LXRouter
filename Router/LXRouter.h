@@ -80,7 +80,7 @@ typedef id _Nullable (^LXStores)(id _Nullable );
 
 @interface UIViewController (RouteStoreSupport)
 
-@property (nonatomic, strong) LXStores _Nullable lx_stores;
+@property (nonatomic,   copy) LXStores _Nullable lx_stores;
 
 @end
 
