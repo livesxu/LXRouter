@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "LXRouter"
-  s.version      = "0.1.0"
+  s.version      = "0.2.0"
   s.summary      = "LXRouter"
   s.homepage     = "https://github.com/livesxu/LXRouter.git"
   s.license      = "MIT"

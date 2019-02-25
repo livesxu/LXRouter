@@ -34,6 +34,13 @@
     [self.view addSubview:present];
     
     [present addTarget:self action:@selector(presentTest) forControlEvents:UIControlEventTouchUpInside];
+    
+    
+    [[LXRouter shareRouter] routeJoinTaskWithKey:@"ttteee" RouteHandle:^{
+        NSLog(@"1111");
+    }];
+    
+    LXRouteMap(@"ttteee");
 }
 
 //传值、回调演示

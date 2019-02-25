@@ -23,6 +23,8 @@ void LXRouteMap(NSString *route){
 
 @property (nonatomic, strong) NSArray *schemes;
 
+@property (nonatomic, strong) NSMutableDictionary *routeHandleTasks;
+
 @end
 
 @implementation LXRouter
@@ -43,6 +45,14 @@ void LXRouteMap(NSString *route){
 
 // - https://LivexuTestVC.push?title=bobo&status=0
 - (void)routeMap:(nonnull NSString *)route animated:(BOOL)flag completion:(void (^ __nullable)(void))completion;{
+    
+    //添加Task实现方式 - 优先级最高 - 注册方法(routeJoinTaskWithKey:RouteHandle:)
+    if ([self.routeHandleTasks.allKeys containsObject:route]) {
+        
+        LXRouterTaskBlock block = self.routeHandleTasks[route];
+        
+        if (block) { block(); if (completion) { completion(); } return ; }
+    }
    
     NSString *eRoute = [route stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     
@@ -320,6 +330,37 @@ void LXRouteMap(NSString *route){
         
         [self routeMap:schemeURL.description animated:YES completion:nil];
     }
+}
+
+//添加handle任务处理处理 -->
+- (NSMutableDictionary *)routeHandleTasks {
+    
+    if (!_routeHandleTasks) {
+        
+        _routeHandleTasks = [NSMutableDictionary dictionary];
+    }
+    return _routeHandleTasks;
+}
+
+/**
+ 非连接式注册响应操作 - 任务
+ 
+ @param routeKey 任务key
+ @param routeHandle 任务执行
+ */
+- (void)routeJoinTaskWithKey:(NSString *_Nonnull)routeKey RouteHandle:(LXRouterTaskBlock)routeHandle {
+    
+    [self.routeHandleTasks setObject:routeHandle forKey:routeKey];
+}
+
+/**
+ 非链接式移除操作
+ 
+ @param routeKey 任务key
+ */
+- (void)routeRemoveTaskWithKey:(NSString *_Nonnull)routeKey {
+    
+    [self.routeHandleTasks removeObjectForKey:routeKey];
 }
 
 @end

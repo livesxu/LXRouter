@@ -7,6 +7,8 @@
 //
 #import <UIKit/UIKit.h>
 
+typedef void(^LXRouterTaskBlock)(void);
+
 @protocol LXRouteDelegate <NSObject>
 
 @required
@@ -71,6 +73,21 @@ void LXRouteMap(NSString *route);
  @return vc
  */
 - (UIViewController *_Nonnull)topViewController;
+
+/**
+ 非链接式注册响应操作 - 任务
+
+ @param routeKey 任务key
+ @param routeHandle 任务执行
+ */
+- (void)routeJoinTaskWithKey:(NSString *_Nonnull)routeKey RouteHandle:(LXRouterTaskBlock)routeHandle;
+
+/**
+ 非链接式移除操作
+
+ @param routeKey 任务key
+ */
+- (void)routeRemoveTaskWithKey:(NSString *_Nonnull)routeKey;
 
 @end
 
