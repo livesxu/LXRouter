@@ -148,10 +148,17 @@ void LXRouteMap(NSString *route){
         
     } else if ([jumpType isEqualToString:@"push"]) {
         
-        [[self topViewController].navigationController pushViewController:currentViewController animated:flag];
-        if (completion) {
-            completion();
+        if ([self topViewController].navigationController) {
+            
+            [[self topViewController].navigationController pushViewController:currentViewController animated:flag];
+            if (completion) {
+                completion();
+            }
+        } else {
+            
+            NSLog(@"最上层非导航,停止执行");
         }
+        
     }
     
 }
