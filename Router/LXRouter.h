@@ -21,7 +21,7 @@ typedef void(^LXRouterTaskBlock)(void);
 
 @end
 
-void LXRouteMap(NSString *route);
+BOOL LXRouteMap(NSString *route);
 
 @interface LXRouter : NSObject
 
@@ -42,7 +42,7 @@ void LXRouteMap(NSString *route);
  @param flag ? animating
  @param completion ?completion action
  */
-- (void)routeMap:(nonnull NSString *)route animated:(BOOL)flag completion:(void (^ __nullable)(void))completion;
+- (BOOL)routeMap:(nonnull NSString *)route animated:(BOOL)flag completion:(void (^ __nullable)(void))completion;
 
 /**
  store 保存执行回调(绑定传递

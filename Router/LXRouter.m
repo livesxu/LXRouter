@@ -9,9 +9,15 @@
 #import "LXRouter.h"
 #import <objc/runtime.h>
 
-void LXRouteMap(NSString *route){
+#if DEBUG
+#define LXLOG(fmt,...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#define LXLOG(fmt,...)
+#endif
+
+BOOL LXRouteMap(NSString *route){
     
-    [[LXRouter shareRouter] routeMap:route animated:YES completion:nil];
+     return [[LXRouter shareRouter] routeMap:route animated:YES completion:nil];
 }
 
 //eg:通用设置 App-Prefs:root=General
@@ -44,14 +50,14 @@ void LXRouteMap(NSString *route){
 }
 
 // - https://LivexuTestVC.push?title=bobo&status=0
-- (void)routeMap:(nonnull NSString *)route animated:(BOOL)flag completion:(void (^ __nullable)(void))completion;{
+- (BOOL)routeMap:(nonnull NSString *)route animated:(BOOL)flag completion:(void (^ __nullable)(void))completion;{
     
     //添加Task实现方式 - 优先级最高 - 注册方法(routeJoinTaskWithKey:RouteHandle:)
     if ([self.routeHandleTasks.allKeys containsObject:route]) {
         
         LXRouterTaskBlock block = self.routeHandleTasks[route];
         
-        if (block) { block(); if (completion) { completion(); } return ; }
+        if (block) { block(); if (completion) { completion(); } return YES; }
     }
    
     NSString *eRoute = [route stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
@@ -59,10 +65,10 @@ void LXRouteMap(NSString *route){
     NSURL *routeUrl = [NSURL URLWithString:eRoute];
     
     //如果是网址,直接web
-    if ([self expressWeb:routeUrl animated:flag]) return;
+    if ([self expressWeb:routeUrl animated:flag]) return YES;
     
     //如果是白名单scheme,直接跳转
-    if ([self expressSchemes:routeUrl]) return ;
+    if ([self expressSchemes:routeUrl]) return YES;
     
     if (self.routeDelegate && [self.routeDelegate respondsToSelector:@selector(routeProject)]) {
         
@@ -70,8 +76,8 @@ void LXRouteMap(NSString *route){
         
         if (![routeUrl.scheme isEqualToString:cerScheme]) {//验证scheme 是否一致，不一致即抛弃
             
-            NSLog(@"未受认证的scheme,被拒绝");
-            return;
+            LXLOG(@"未受认证的scheme,被拒绝");
+            return NO;
         }
     }
     
@@ -81,8 +87,8 @@ void LXRouteMap(NSString *route){
     NSString *jumpType;//跳转方式
     if (![objectAction containsString:@".push"] && ![objectAction containsString:@".present"]) {
         
-        NSLog(@"未指定确切的跳转方式,被拒绝");
-        return;
+        LXLOG(@"未指定确切的跳转方式,被拒绝");
+        return NO;
     }else{
         jumpType = [objectAction substringFromIndex:[objectAction rangeOfString:@"."].location +1];
         
@@ -104,8 +110,8 @@ void LXRouteMap(NSString *route){
     
     if (!CurrentClass && ([jumpType isEqualToString:@"present"] || [jumpType isEqualToString:@"push"])) {
         
-        NSLog(@"%@ Have No",classString);
-        return;
+        LXLOG(@"%@ Have No",classString);
+        return NO;
     }
     //确定创建
     UIViewController *currentViewController = [[CurrentClass alloc] init];
@@ -156,11 +162,12 @@ void LXRouteMap(NSString *route){
             }
         } else {
             
-            NSLog(@"最上层非导航,停止执行");
+            LXLOG(@"最上层非导航,停止执行");
+            return NO;
         }
         
     }
-    
+    return YES;
 }
 
 //获取所有的成员变量名称
@@ -223,7 +230,7 @@ void LXRouteMap(NSString *route){
         }
         if (!classString) {
             
-            NSLog(@"Mapper have no http(s)");
+            LXLOG(@"Mapper have no http(s)");
             return NO;
         }
     }
@@ -271,7 +278,7 @@ void LXRouteMap(NSString *route){
     
     if (!CurrentClass) {
         
-        NSLog(@"%@ Have No",classString);
+        LXLOG(@"%@ Have No",classString);
         return;
     }
     
